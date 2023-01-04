@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://bootswatch.com/5/darkly/bootstrap.min.css"
+    />
+    <!-- Link Swiper's CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper/swiper-bundle.min.css"
+    />
+
+    <title>Weather Application | Find Local Weather</title>
+    <style>
+      body {
+        background: url(/assets/images/galazy-background.jpg) no-repeat
+          center/cover;
+        position: relative;
+
+      }
+
+      body:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #00000066;
+        z-index: -1;
+      }
+
+      #spinner {
+        height: 100vh;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #00000098;
+        z-index: 99999;
+        visibility: visible;
+        opacity: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #spinner.inactive {
+        visibility: hidden;
+        opacity: 0;
+      }
+
+      #git {
+        position: fixed;
+        left: 16px;
+        top: 16px;
+        height: 40px;
+        transition: 0.5s ease;
+      }
+
+      #git:hover {
+        transform: scale(0.95);
+      }
+
+      #search {
+        position: fixed;
+        right: 16px;
+        top: 16px;
+      }
+
+      #search img {
+        height: 20px;
+        margin-right: 0.5rem;
+        opacity: 0.8;
+      }
+
+      html,
+      body {
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .swiper {
+        max-width: 750px;
+        height: 200px;
+        margin-top: 1rem;
+      }
+
+      .swiper-slide {
+        text-align: center;
+        margin: 0 !important;
+        padding: 1rem;
+        border-right: 1px solid #f9f9f9;
+
+        /* Center slide text vertically */
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        flex-direction: column;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+      }
+
+      .swiper-slide img {
+        display: block;
+        margin-top: -32px;
+        object-fit: contain;
+      }
+
+      .swiper-pagination-bullet {
+        background-color: #fff;
+      }
+
+      .forecast {
+        margin-top: 3rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- GITHUB -->
+    <a href="https://github.com/Profesor-X" target="_blank">
+      <img id="git" src="\assets\images\github-icon.png" alt="" srcset="" />
+    </a>
+    <!-- Button trigger modal -->
+    <button
+      id="search"
+      type="button"
+      class="btn btn-light text-dark d-flex"
+      data-bs-toggle="modal"
+      data-bs-target="#locModal"
+    >
+      <img src="\assets\images\magnifying-glass-solid.svg" alt="" srcset="" />
+      Search by ZIP code...
+    </button>
+    <!-- SPINNER -->
+    <div id="spinner" class="d-flex justify-content-center align-items-center">
+      <div class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </div>
+    </div>
+
+    <div class="container" style="height: 100vh">
+      <div class="row h-55">
+        <div
+          class="col-md-6 mx-auto text-center bg-primary mt-5 p-5 rounded shadow-lg"
+        >
+          <h1 id="w-location"></h1>
+          <h3
+            class="text-white text-uppercase text-muted lead"
+            id="w-desc"
+          ></h3>
+          <h3 id="w-string"></h3>
+          <img id="w-icon" />
+          <ul id="w-details" class="list-group mt-3">
+            <strong>
+              <li
+                class="list-group-item bg-light text-dark"
+                id="w-humidity"
+              ></li>
+            </strong>
+            <strong>
+              <li
+                class="list-group-item bg-light text-dark"
+                id="w-pressure"
+              ></li>
+            </strong>
+            <strong>
+              <li
+                class="list-group-item bg-light text-dark"
+                id="w-feels-like"
+              ></li>
+            </strong>
+            <strong>
+              <li class="list-group-item bg-light text-dark" id="w-wind"></li>
+            </strong>
+          </ul>
+          <hr />
+        </div>
+      </div>
+
+      <div class="row h-45">
+        <h2 class="text-center forecast">7-Day Forecast</h2>
+        <!-- Swiper -->
+        <div class="swiper mySwiper">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide bg-primary"></div>
+            <div class="swiper-slide bg-primary"></div>
+            <div class="swiper-slide bg-primary"></div>
+            <div class="swiper-slide bg-primary"></div>
+            <div class="swiper-slide bg-primary"></div>
+            <div class="swiper-slide bg-primary"></div>
+            <div class="swiper-slide bg-primary"></div>
+          </div>
+          <div class="swiper-pagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="locModal"
+      tabindex="-1"
+      aria-labelledby="locModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="locModalLabel">Change Location</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="w-form">
+              <div class="form-group">
+                <input
+                  placeholder="Enter your Zip code..."
+                  type="text"
+                  id="zipcode"
+                  class="form-control"
+                />
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button id="w-change-btn" type="button" class="btn btn-primary">
+              Change Location
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script src="weather.js"></script>
+    <script src="ui.js"></script>
+    <script src="app.js"></script>
+    <!-- Swiper JS -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <!-- Initialize Swiper -->
+    <script>
+      var swiper = new Swiper(".mySwiper", {
+        slidesPerView: 3,
+        spaceBetween: 30,
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+      });
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
+      integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
+      integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
